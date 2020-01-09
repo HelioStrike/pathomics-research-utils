@@ -14,7 +14,7 @@ def get_image_subpatches(im, size=(32,32)):
     while(i < im.shape[0]-size[0]):
         j = 0
         while(j < im.shape[1]-size[1]):
-            patches.append(tf.concert_to_tensor(im[i:i+size[0],j:j+size[1]]))
+            patches.append(im[i:i+size[0],j:j+size[1]])
             j += size[1]
         i += size[0]
     return np.array(patches)
