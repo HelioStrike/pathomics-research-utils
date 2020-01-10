@@ -10,15 +10,16 @@ from tensorflow.keras.utils import Sequence
 class SubPatchingSegmentationDataGenerator(Sequence):
     def __init__(self, paired_images_list=None, patch_height=32, patch_width=32,
                  batch_size=32, shuffle=True, augmentation=None,
-                 magnify=None, num_channels=3):
+                 magnify=None, num_channels=3, output_channels=1):
         self.batch_size = batch_size
         self.patch_height = patch_height
         self.patch_width = patch_width
         self.num_channels = num_channels
+        self.output_channels = output_channels
         self.shuffle = shuffle
         self.augmentation = augmentation
         self.paired_images_list = paired_images_list
-        self.len = len(self.paired_images_list) * len(utils.get_image_subpatches(utils.read_image(paired_images_list[0][0]))) // self.batch_size
+        self.len = int(len(self.paired_images_list) * (len(utils.get_image_subpatches(utils.read_image(paired_images_list[0][0])))**(0.5)-1)**2 // self.batch_size)
         self.shuffle = shuffle
         self.magnify = magnify
         self.image_ptr = 0
@@ -27,23 +28,38 @@ class SubPatchingSegmentationDataGenerator(Sequence):
         self.mask_patches = []
 
     def __len__(self):
-        return self.len
+        return self.len-1
     
     def on_epoch_start(self):
+        self.image_ptr = 0
+        self.cur = 0
         if self.shuffle:
             random.shuffle(self.paired_images_list)
 
     def __getitem__(self, idx):
         X = np.empty((self.batch_size, self.patch_height, self.patch_width, self.num_channels))
-        y = np.empty((self.batch_size, self.patch_height, self.patch_width, self.num_channels))
+        y = np.empty((self.batch_size, self.patch_height, self.patch_width, self.output_channels))
         for i in range(self.batch_size):
             if self.cur == len(self.org_patches):
-                self.image_ptr += 1
                 self.cur = 0
+                if(self.image_ptr == len(self.paired_images_list)):
+                    self.image_ptr = 0
                 self.org_patches = utils.get_image_subpatches(utils.read_image(self.paired_images_list[self.image_ptr][0]))
                 self.mask_patches = utils.get_image_subpatches(utils.read_image(self.paired_images_list[self.image_ptr][1]))
-            X[i] = self.org_patches[self.cur]
-            y[i] = self.mask_patches[self.cur]
+                self.image_ptr += 1
+
+            dims = self.org_patches[self.cur].shape
+            if(len(dims) == 2):
+                X[i] = self.org_patches[self.cur].reshape(*dims, 1)
+            else:
+                X[i] = self.org_patches[self.cur]
+
+            dims = self.mask_patches[self.cur].shape
+            if(len(dims) == 2):
+                y[i] = self.mask_patches[self.cur].reshape(*dims, 1)
+            else:
+                y[i] = self.mask_patches[self.cur]
+
             if self.augmentation:
                 X[i] = self.augmentation(X[i])
                 y[i] = self.augmentation(y[i])

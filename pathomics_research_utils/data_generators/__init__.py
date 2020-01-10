@@ -1,2 +1,2 @@
-from .subpatching_data_generator import *
+from .subpatching_data_generators import *
 from .classification_data_generator import *
