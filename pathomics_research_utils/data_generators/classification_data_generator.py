@@ -6,6 +6,7 @@ from copy import deepcopy
 from pathomics_research_utils import utils
 from tensorflow.keras.utils import Sequence
 
+#Use the path to a directory containing nested directories of images (each corresponding to a class)
 class ClassificationDataGenerator(Sequence):
     def __init__(self, images_dir=None, height=32, width=32, resize=False,
                  batch_size=32, shuffle=True, augmentation=None,

@@ -5,6 +5,8 @@ from copy import deepcopy
 from pathomics_research_utils import utils
 from tensorflow.keras.utils import Sequence
 
+#Send a list of corresponding image paths
+#Divides images into patches and sends them
 class SubPatchingSegmentationDataGenerator(Sequence):
     def __init__(self, paired_images_list=None, patch_height=32, patch_width=32,
                  batch_size=32, shuffle=True, augmentation=None,
@@ -48,6 +50,9 @@ class SubPatchingSegmentationDataGenerator(Sequence):
             self.cur += 1
         return X, y
 
+#Use the path to a directory containing nested directories of images (each corresponding to a class)
+#Divides images into patches
+#WARNING: This loads the whole dataset into memory, to effectively shuffle the data
 class SubPatchingClassificationDataGenerator(Sequence):
     def __init__(self, images_dir=None, patch_height=32, patch_width=32,
                  batch_size=32, shuffle=True, augmentation=None,
@@ -88,7 +93,7 @@ class SubPatchingClassificationDataGenerator(Sequence):
         y = np.zeros((self.batch_size, self.num_classes))
         for i in range(self.batch_size):
             X[i] = self.images[idx*self.batch_size+i]
-            y[self.image_labels[idx*self.batch_size+i]] = 1
+            y[i][self.image_labels[idx*self.batch_size+i]] = 1
             if self.augmentation:
                 X[i] = self.augmentation(X[i])
         return X, y
