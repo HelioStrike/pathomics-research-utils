@@ -18,7 +18,7 @@ def get_image_subpatches(im, size=(32,32)):
             j += size[1]
         i += size[0]
     return np.array(patches)
-
+    
 #Display images side-by-side
 def displayImagesSideBySide(imgs, size=(20,40)):
     f, ax = plt.subplots(1,len(imgs), figsize=size)
