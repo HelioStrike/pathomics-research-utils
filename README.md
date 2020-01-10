@@ -12,5 +12,6 @@ or
 Clone and install.
 ```
 git clone https://github.com/HelioStrike/pathomics-research-utils
+cd pathomics-research-utils
 sudo pip3 install .
 ```
