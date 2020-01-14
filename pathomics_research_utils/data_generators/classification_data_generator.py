@@ -38,13 +38,20 @@ class ClassificationDataGenerator(Sequence):
         self.resize = resize
         self.magnify = magnify
         self.len = len(self.images) // self.batch_size
+        if self.shuffle:
+            self.shuffle_data()
 
     def __len__(self):
         return self.len
-    
+
+    def shuffle_data(self):
+        a = list(zip(self.images, self.image_labels))
+        random.shuffle(a)
+        self.images, self.image_labels = zip(*a)
+
     def on_epoch_start(self):
-        if shuffle:
-            self.images, self.image_labels = zip(*random.shuffle(list(zip(self.images, self.image_labels))))
+        if self.shuffle:
+            self.shuffle_data()
 
     def __getitem__(self, idx):
         X = np.empty((self.batch_size, self.height, self.width, self.num_channels))

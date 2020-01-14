@@ -8,8 +8,8 @@ from tensorflow.keras.utils import Sequence
 #Send a list of corresponding image paths
 #Divides images into patches and sends them
 class SubPatchingSegmentationDataGenerator(Sequence):
-    def __init__(self, paired_images_list=None, patch_height=32, patch_width=32,
-                 batch_size=32, shuffle=True, augmentation=None,
+    def __init__(self, paired_images_list=None, patch_height=500, patch_width=500,
+                 batch_size=8, shuffle=True, augmentation=None,
                  magnify=None, num_channels=3, output_channels=1):
         self.batch_size = batch_size
         self.patch_height = patch_height
@@ -28,7 +28,7 @@ class SubPatchingSegmentationDataGenerator(Sequence):
         self.mask_patches = []
 
     def __len__(self):
-        return self.len-1
+        return (self.len-1)
     
     def on_epoch_start(self):
         self.image_ptr = 0
@@ -44,8 +44,8 @@ class SubPatchingSegmentationDataGenerator(Sequence):
                 self.cur = 0
                 if(self.image_ptr == len(self.paired_images_list)):
                     self.image_ptr = 0
-                self.org_patches = utils.get_image_subpatches(utils.read_image(self.paired_images_list[self.image_ptr][0]))
-                self.mask_patches = utils.get_image_subpatches(utils.read_image(self.paired_images_list[self.image_ptr][1]))
+                self.org_patches = utils.get_image_subpatches(utils.read_image(self.paired_images_list[self.image_ptr][0]), size=(self.patch_height, self.patch_width))
+                self.mask_patches = utils.get_image_subpatches(utils.read_image(self.paired_images_list[self.image_ptr][1]), size=(self.patch_height, self.patch_width))
                 self.image_ptr += 1
 
             dims = self.org_patches[self.cur].shape
@@ -65,6 +65,7 @@ class SubPatchingSegmentationDataGenerator(Sequence):
                 y[i] = self.augmentation(y[i])
             self.cur += 1
         return X, y
+
 
 #Use the path to a directory containing nested directories of images (each corresponding to a class)
 #Divides images into patches
@@ -90,7 +91,7 @@ class SubPatchingClassificationDataGenerator(Sequence):
             fnames = os.listdir(dir_path)
             cur=0
             for fname in fnames:
-                patches = utils.get_image_subpatches(utils.read_image(os.path.join(dir_path, fname)))
+                patches = utils.get_image_subpatches(utils.read_image(os.path.join(dir_path, fname)), size=(self.patch_height, self.patch_width))
                 self.images = np.concatenate([self.images, patches], axis=0)
                 self.image_labels += [i]*len(patches)
                 cur+=1
