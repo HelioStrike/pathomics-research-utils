@@ -20,8 +20,11 @@ def get_image_subpatches(im, size=(32,32)):
     return np.array(patches)
     
 #Display images side-by-side
-def displayImagesSideBySide(imgs, size=(20,40)):
+def displayImagesSideBySide(imgs, titles=None, size=(20,40)):
     f, ax = plt.subplots(1,len(imgs), figsize=size)
     for i in range(len(imgs)):
         ax[i].imshow(imgs[i])
+        if titles is not None:
+            ax[i].title.set_text(titles[i])
+            ax[i].title.set_size(20)
     plt.show()
